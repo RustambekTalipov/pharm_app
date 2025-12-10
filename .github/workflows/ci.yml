@@ -1,0 +1,52 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # --- ПРОВЕРКА SERVER ---
+      - name: Use Node.js for Server
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install Server Dependencies
+        run:cd server && npm install
+
+      # (Опционально) Добавьте линтер, если есть
+      # - name: Lint Server
+      #   run: cd server && npm run lint
+
+      # --- ПРОВЕРКА CLIENT ---
+      - name: Use Node.js for Client
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Client Dependencies
+        run: cd client && npm install
+
+      - name: Lint Client (Quality Check)
+        # Это выполняет требование о проверке качества кода перед сборкой
+        # Убедитесь, что в package.json клиента есть скрипт "lint" (Vite обычно добавляет его)
+        run: cd client && npm run lint --if-present
+
+      - name: Build Client
+        run: cd client && npm run build
