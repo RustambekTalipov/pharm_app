@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "lint": "echo 'Linting skipped for API' && exit 0",
+    "build": "echo 'No build required for API' && exit 0"
   },
   "dependencies": {
     "cors": "^2.8.5",
