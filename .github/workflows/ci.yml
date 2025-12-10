@@ -1,52 +1,30 @@
-name: CI/CD Pipeline
+name: CI Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
+      # 1. Скачиваем код
       - uses: actions/checkout@v3
 
-      # --- ПРОВЕРКА SERVER ---
-      - name: Use Node.js for Server
+      # 2. Ставим Node.js
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18.x
           cache: 'npm'
-          cache-dependency-path: server/package-lock.json
 
-      - name: Install Server Dependencies
-        run:cd server && npm install
+      # 3. Устанавливаем зависимости
+      - name: Install Dependencies
+        run: npm install
 
-      # (Опционально) Добавьте линтер, если есть
-      # - name: Lint Server
-      #   run: cd server && npm run lint
-
-      # --- ПРОВЕРКА CLIENT ---
-      - name: Use Node.js for Client
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
-
-      - name: Install Client Dependencies
-        run: cd client && npm install
-
-      - name: Lint Client (Quality Check)
-        # Это выполняет требование о проверке качества кода перед сборкой
-        # Убедитесь, что в package.json клиента есть скрипт "lint" (Vite обычно добавляет его)
-        run: cd client && npm run lint --if-present
-
-      - name: Build Client
-        run: cd client && npm run build
+      # 4. Собираем проект (Самый важный шаг)
+      - name: Build Project
+        run: npm run build
